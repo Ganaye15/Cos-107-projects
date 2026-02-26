@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Booking System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(168, 85, 247, 0.2));
+            padding: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3rem;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            position: relative;
+            min-width: fit-content;
+        }
+        
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 100%;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .step:last-child::after {
+            display: none;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+        
+        .step.active .step-number {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .step.active .step-label {
+            color: white;
+        }
+        
+        .content {
+            padding: 40px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+        
+        .step-content {
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+        
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+        
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .calendar-header button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #cbd5e1;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-header button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .calendar-header span {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .calendar-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .day-name {
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #94a3b8;
+            padding: 8px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+        }
+        
+        .calendar-day:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .calendar-day:disabled {
+            color: #475569;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .calendar-day.selected {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+        
+        .calendar-day.today {
+            ring: 2px solid rgba(139, 92, 246, 0.5);
+        }
+        
+        .calendar-day.empty {
+            visibility: hidden;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .time-slot {
+            padding: 16px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+        }
+        
+        .time-slot:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        
+        .time-slot.selected {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+        
+        .guest-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 16px;
+        }
+        
+        .guest-counter button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .guest-counter button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .guest-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .guest-display svg {
+            width: 32px;
+            height: 32px;
+            color: #a78bfa;
+        }
+        
+        .guest-display span {
+            font-size: 3rem;
+            font-weight: 300;
+            color: white;
+        }
+        
+        /* Menu Items */
+        .menu-categories {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .category-btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .menu-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        
+        .menu-item.selected {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+        }
+        
+        .menu-item-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+        
+        .menu-item-content {
+            padding: 16px;
+        }
+        
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        
+        .menu-item-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .menu-item-price {
+            color: #a78bfa;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .menu-item-description {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        
+        .menu-item-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            font-size: 0.75rem;
+        }
+        
+        .selected-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.6);
+        }
+        
+        .menu-item.selected .selected-indicator {
+            display: flex;
+        }
+        
+        .selected-meals-summary {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        .selected-meals-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .selected-meal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .selected-meal-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .selected-meal-icon {
+            font-size: 2rem;
+        }
+        
+        .selected-meal-details {
+            color: #cbd5e1;
+        }
+        
+        .selected-meal-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+        
+        .remove-meal {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .remove-meal:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #cbd5e1;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #64748b;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: none;
+        }
+        
+        .summary-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        .summary-box h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 16px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #cbd5e1;
+        }
+        
+        .summary-item span:last-child {
+            font-weight: 500;
+            color: white;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.6);
+        }
+        
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            opacity: 0.5;
+            box-shadow: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .note {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 16px;
+        }
+        
+        /* Confirmation Screen */
+        .confirmation {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .check-circle {
+            width: 96px;
+            height: 96px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+            animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .check-circle svg {
+            width: 48px;
+            height: 48px;
+            color: white;
+            stroke-width: 3;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .confirmation h2 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        
+        .confirmation p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-bar {
+                padding: 20px;
+            }
+            
+            .step-label {
+                font-size: 0.75rem;
+            }
+            
+            .content {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Table Reservation</h1>
+            <p>Reserve your experience at Maison Élégante</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <span class="step-label">Date & Time</span>
+            </div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <span class="step-label">Party Size</span>
+            </div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <span class="step-label">Menu</span>
+            </div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <span class="step-label">Details</span>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Date & Time -->
+            <div class="step-content active" id="step1">
+                <h2>Select Date</h2>
+                
+                <div class="calendar-header">
+                    <button id="prevMonth">‹</button>
+                    <span id="monthYear"></span>
+                    <button id="nextMonth">›</button>
+                </div>
+                
+                <div class="calendar-wrapper">
+                    <div class="calendar-days">
+                        <div class="day-name">Sun</div>
+                        <div class="day-name">Mon</div>
+                        <div class="day-name">Tue</div>
+                        <div class="day-name">Wed</div>
+                        <div class="day-name">Thu</div>
+                        <div class="day-name">Fri</div>
+                        <div class="day-name">Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar"></div>
+                </div>
+                
+                <div id="timeSection" class="hidden">
+                    <h2>Select Time</h2>
+                    <div class="time-slots" id="timeSlots"></div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" id="step1Next" disabled>Continue to Party Size</button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Party Size -->
+            <div class="step-content" id="step2">
+                <h2>How many guests?</h2>
+                
+                <div class="guest-counter">
+                    <button id="decreaseGuests">−</button>
+                    <div class="guest-display">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span id="guestCount">2</span>
+                    </div>
+                    <button id="increaseGuests">+</button>
+                </div>
+                
+                <p class="note">For parties larger than 12, please call us directly</p>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="step2Back">Back</button>
+                    <button class="btn btn-primary" id="step2Next">Continue to Menu</button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Menu Selection -->
+            <div class="step-content" id="step3">
+                <h2>Select Your Meals</h2>
+                <p style="color: #94a3b8; margin-bottom: 24px;">Choose dishes for your dining experience (optional)</p>
+                
+                <div class="menu-categories">
+                    <button class="category-btn active" data-category="all">All Menu</button>
+                    <button class="category-btn" data-category="appetizers">Appetizers</button>
+                    <button class="category-btn" data-category="mains">Main Courses</button>
+                    <button class="category-btn" data-category="desserts">Desserts</button>
+                    <button class="category-btn" data-category="drinks">Drinks</button>
+                </div>
+                
+                <div class="menu-grid" id="menuGrid"></div>
+                
+                <div id="selectedMealsSummary" class="selected-meals-summary hidden">
+                    <h3>Selected Meals</h3>
+                    <div class="selected-meals-list" id="selectedMealsList"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Dietary Requirements or Preferences</label>
+                    <textarea id="menuSpecialRequests" rows="3" placeholder="E.g., Vegetarian options, nut allergies, gluten-free, etc."></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="step3Back">Back</button>
+                    <button class="btn btn-primary" id="step3Next">Continue to Details</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Details -->
+            <div class="step-content" id="step4">
+                <h2>Your Details</h2>
+                
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="name" placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" placeholder="john@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="+1 (555) 000-0000" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Special Requests</label>
+                    <textarea id="specialRequests" rows="4" placeholder="Special occasions, seating preferences, accessibility needs..."></textarea>
+                </div>
+                
+                <div class="summary-box">
+                    <h3>Reservation Summary</h3>
+                    <div class="summary-item">
+                        <span>Date:</span>
+                        <span id="summaryDate">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Time:</span>
+                        <span id="summaryTime">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Guests:</span>
+                        <span id="summaryGuests">-</span>
+                    </div>
+                    <div class="summary-item" id="summaryMealsItem" style="display: none;">
+                        <span>Pre-selected Meals:</span>
+                        <span id="summaryMeals">-</span>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="step4Back">Back</button>
+                    <button class="btn btn-primary" id="confirmBooking" disabled>Confirm Reservation</button>
+                </div>
+            </div>
+            
+            <!-- Confirmation -->
+            <div class="step-content" id="confirmation">
+                <div class="confirmation">
+                    <div class="check-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    
+                    <h2>Reservation Confirmed</h2>
+                    <p>We look forward to welcoming you</p>
+                    
+                    <div class="summary-box">
+                        <div class="summary-item" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+                            <span>Guest</span>
+                            <span id="confirmName">-</span>
+                        </div>
+                        <div class="summary-item" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 0;">
+                            <span>Date</span>
+                            <span id="confirmDate">-</span>
+                        </div>
+                        <div class="summary-item" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 0;">
+                            <span>Time</span>
+                            <span id="confirmTime">-</span>
+                        </div>
+                        <div class="summary-item" style="padding: 12px 0;" id="confirmMealsSection">
+                            <span>Party Size</span>
+                            <span id="confirmGuests">-</span>
+                        </div>
+                    </div>
+                    
+                    <div id="confirmSelectedMeals" class="summary-box hidden">
+                        <h3>Your Selected Meals</h3>
+                        <div id="confirmMealsList"></div>
+                    </div>
+                    
+                    <p class="note" style="margin-bottom: 24px;">
+                        A confirmation email has been sent to <span id="confirmEmail"></span>
+                    </p>
+                    
+                    <button class="btn btn-primary" id="makeAnother">Make Another Reservation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menu Data
+        const menuItems = [
+            {
+                id: 1,
+                name: 'French Onion Soup',
+                category: 'appetizers',
+                price: 12,
+                description: 'Caramelized onions in rich broth with melted Gruyère',
+                icon: '🍲',
+                tags: ['Vegetarian']
+            },
+            {
+                id: 2,
+                name: 'Escargots de Bourgogne',
+                category: 'appetizers',
+                price: 16,
+                description: 'Classic French snails with garlic herb butter',
+                icon: '🐌',
+                tags: ['House Specialty']
+            },
+            {
+                id: 3,
+                name: 'Caesar Salad',
+                category: 'appetizers',
+                price: 14,
+                description: 'Crisp romaine, parmesan, croutons, classic dressing',
+                icon: '🥗',
+                tags: ['Light']
+            },
+            {
+                id: 4,
+                name: 'Beef Bourguignon',
+                category: 'mains',
+                price: 38,
+                description: 'Tender beef braised in red wine with pearl onions and mushrooms',
+                icon: '🍖',
+                tags: ['Chef\'s Special']
+            },
+            {
+                id: 5,
+                name: 'Coq au Vin',
+                category: 'mains',
+                price: 32,
+                description: 'Chicken braised with wine, mushrooms, and bacon',
+                icon: '🍗',
+                tags: ['Traditional']
+            },
+            {
+                id: 6,
+                name: 'Pan-Seared Salmon',
+                category: 'mains',
+                price: 34,
+                description: 'Atlantic salmon with lemon butter sauce and seasonal vegetables',
+                icon: '🐟',
+                tags: ['Healthy', 'Gluten-Free']
+            },
+            {
+                id: 7,
+                name: 'Truffle Risotto',
+                category: 'mains',
+                price: 28,
+                description: 'Creamy arborio rice with black truffle and parmesan',
+                icon: '🍚',
+                tags: ['Vegetarian', 'Luxury']
+            },
+            {
+                id: 8,
+                name: 'Rack of Lamb',
+                category: 'mains',
+                price: 42,
+                description: 'Herb-crusted lamb with rosemary jus and roasted potatoes',
+                icon: '🍖',
+                tags: ['Premium']
+            },
+            {
+                id: 9,
+                name: 'Crème Brûlée',
+                category: 'desserts',
+                price: 10,
+                description: 'Classic vanilla custard with caramelized sugar',
+                icon: '🍮',
+                tags: ['House Favorite']
+            },
+            {
+                id: 10,
+                name: 'Chocolate Fondant',
+                category: 'desserts',
+                price: 12,
+                description: 'Warm chocolate cake with molten center, vanilla ice cream',
+                icon: '🍫',
+                tags: ['Decadent']
+            },
+            {
+                id: 11,
+                name: 'Tarte Tatin',
+                category: 'desserts',
+                price: 11,
+                description: 'Caramelized apple tart with whipped cream',
+                icon: '🥧',
+                tags: ['Traditional']
+            },
+            {
+                id: 12,
+                name: 'French Wine Selection',
+                category: 'drinks',
+                price: 45,
+                description: 'Curated selection of premium French wines',
+                icon: '🍷',
+                tags: ['By the Bottle']
+            },
+            {
+                id: 13,
+                name: 'Champagne',
+                category: 'drinks',
+                price: 65,
+                description: 'Premium champagne from the Champagne region',
+                icon: '🥂',
+                tags: ['Celebration']
+            },
+            {
+                id: 14,
+                name: 'Artisan Cocktails',
+                category: 'drinks',
+                price: 15,
+                description: 'Hand-crafted cocktails with premium spirits',
+                icon: '🍸',
+                tags: ['Signature']
+            }
+        ];
+
+        // State
+        let currentStep = 1;
+        let selectedDate = null;
+        let selectedTime = null;
+        let guests = 2;
+        let selectedMeals = [];
+        let currentCategory = 'all';
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        
+        const timeSlots = [
+            '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+            '20:00', '20:30', '21:00', '21:30', '22:00'
+        ];
+        
+        // Initialize
+        function init() {
+            renderCalendar();
+            renderTimeSlots();
+            renderMenuItems();
+            setupEventListeners();
+        }
+        
+        // Calendar
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            document.getElementById('monthYear').textContent = 
+                new Date(currentYear, currentMonth).toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Empty cells
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('button');
+                emptyDay.className = 'calendar-day empty';
+                emptyDay.disabled = true;
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                date.setHours(0, 0, 0, 0);
+                
+                const dayBtn = document.createElement('button');
+                dayBtn.className = 'calendar-day';
+                dayBtn.textContent = day;
+                
+                if (date < today) {
+                    dayBtn.disabled = true;
+                }
+                
+                if (date.getTime() === today.getTime()) {
+                    dayBtn.classList.add('today');
+                }
+                
+                if (selectedDate && selectedDate.getTime() === date.getTime()) {
+                    dayBtn.classList.add('selected');
+                }
+                
+                dayBtn.addEventListener('click', () => selectDate(date));
+                calendar.appendChild(dayBtn);
+            }
+        }
+        
+        function selectDate(date) {
+            selectedDate = date;
+            renderCalendar();
+            document.getElementById('timeSection').classList.remove('hidden');
+            updateStep1Button();
+        }
+        
+        // Time Slots
+        function renderTimeSlots() {
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = '';
+            
+            timeSlots.forEach(time => {
+                const slot = document.createElement('button');
+                slot.className = 'time-slot';
+                slot.textContent = time;
+                
+                if (selectedTime === time) {
+                    slot.classList.add('selected');
+                }
+                
+                slot.addEventListener('click', () => selectTime(time));
+                container.appendChild(slot);
+            });
+        }
+        
+        function selectTime(time) {
+            selectedTime = time;
+            renderTimeSlots();
+            updateStep1Button();
+        }
+        
+        function updateStep1Button() {
+            document.getElementById('step1Next').disabled = !(selectedDate && selectedTime);
+        }
+        
+        // Menu Items
+        function renderMenuItems(category = 'all') {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+            
+            const filteredItems = category === 'all' 
+                ? menuItems 
+                : menuItems.filter(item => item.category === category);
+            
+            filteredItems.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'menu-item';
+                if (selectedMeals.find(m => m.id === item.id)) {
+                    itemEl.classList.add('selected');
+                }
+                
+                itemEl.innerHTML = `
+                    <div style="position: relative;">
+                        <div class="menu-item-image">${item.icon}</div>
+                        <div class="selected-indicator">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-header">
+                            <div class="menu-item-name">${item.name}</div>
+                            <div class="menu-item-price">$${item.price}</div>
+                        </div>
+                        <div class="menu-item-description">${item.description}</div>
+                        <div class="menu-item-tags">
+                            ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                itemEl.addEventListener('click', () => toggleMeal(item));
+                grid.appendChild(itemEl);
+            });
+        }
+        
+        function toggleMeal(item) {
+            const index = selectedMeals.findIndex(m => m.id === item.id);
+            
+            if (index > -1) {
+                selectedMeals.splice(index, 1);
+            } else {
+                selectedMeals.push(item);
+            }
+            
+            renderMenuItems(currentCategory);
+            updateSelectedMealsSummary();
+        }
+        
+        function updateSelectedMealsSummary() {
+            const summary = document.getElementById('selectedMealsSummary');
+            const list = document.getElementById('selectedMealsList');
+            
+            if (selectedMeals.length === 0) {
+                summary.classList.add('hidden');
+                return;
+            }
+            
+            summary.classList.remove('hidden');
+            list.innerHTML = '';
+            
+            selectedMeals.forEach(meal => {
+                const mealEl = document.createElement('div');
+                mealEl.className = 'selected-meal-item';
+                mealEl.innerHTML = `
+                    <div class="selected-meal-info">
+                        <div class="selected-meal-icon">${meal.icon}</div>
+                        <div class="selected-meal-details">
+                            <div class="selected-meal-name">${meal.name}</div>
+                            <div style="font-size: 0.9rem;">$${meal.price}</div>
+                        </div>
+                    </div>
+                    <button class="remove-meal" data-id="${meal.id}">Remove</button>
+                `;
+                
+                mealEl.querySelector('.remove-meal').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleMeal(meal);
+                });
+                
+                list.appendChild(mealEl);
+            });
+        }
+        
+        // Guest Counter
+        function updateGuestCount() {
+            document.getElementById('guestCount').textContent = guests;
+        }
+        
+        // Navigation
+        function goToStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update progress bar
+            document.querySelectorAll('.step').forEach((stepEl, index) => {
+                if (index < step) {
+                    stepEl.classList.add('active');
+                } else {
+                    stepEl.classList.remove('active');
+                }
+            });
+            
+            currentStep = step;
+            
+            // Update summary on step 4
+            if (step === 4) {
+                updateSummary();
+            }
+            
+            // Scroll to top
+            document.querySelector('.content').scrollTop = 0;
+        }
+        
+        function updateSummary() {
+            const dateStr = selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('summaryDate').textContent = dateStr;
+            document.getElementById('summaryTime').textContent = selectedTime;
+            document.getElementById('summaryGuests').textContent = guests;
+            
+            const mealsItem = document.getElementById('summaryMealsItem');
+            if (selectedMeals.length > 0) {
+                mealsItem.style.display = 'flex';
+                document.getElementById('summaryMeals').textContent = `${selectedMeals.length} items selected`;
+            } else {
+                mealsItem.style.display = 'none';
+            }
+        }
+        
+        function validateForm() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            document.getElementById('confirmBooking').disabled = !(name && email && phone);
+        }
+        
+        function confirmBooking() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            
+            const dateStr = selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('confirmName').textContent = name;
+            document.getElementById('confirmDate').textContent = dateStr;
+            document.getElementById('confirmTime').textContent = selectedTime;
+            document.getElementById('confirmGuests').textContent = `${guests} ${guests === 1 ? 'guest' : 'guests'}`;
+            document.getElementById('confirmEmail').textContent = email;
+            
+            // Show selected meals in confirmation
+            const confirmMealsSection = document.getElementById('confirmSelectedMeals');
+            const confirmMealsList = document.getElementById('confirmMealsList');
+            
+            if (selectedMeals.length > 0) {
+                confirmMealsSection.classList.remove('hidden');
+                confirmMealsList.innerHTML = selectedMeals.map(meal => `
+                    <div class="summary-item" style="padding: 8px 0;">
+                        <span>${meal.icon} ${meal.name}</span>
+                        <span>$${meal.price}</span>
+                    </div>
+                `).join('');
+            } else {
+                confirmMealsSection.classList.add('hidden');
+            }
+            
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById('confirmation').classList.add('active');
+        }
+        
+        function resetBooking() {
+            currentStep = 1;
+            selectedDate = null;
+            selectedTime = null;
+            guests = 2;
+            selectedMeals = [];
+            currentCategory = 'all';
+            currentMonth = new Date().getMonth();
+            currentYear = new Date().getFullYear();
+            
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('specialRequests').value = '';
+            document.getElementById('menuSpecialRequests').value = '';
+            
+            renderCalendar();
+            renderTimeSlots();
+            renderMenuItems();
+            updateGuestCount();
+            updateSelectedMealsSummary();
+            goToStep(1);
+            
+            document.getElementById('timeSection').classList.add('hidden');
+            
+            // Reset category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === 'all') {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Event Listeners
+        function setupEventListeners() {
+            // Calendar navigation
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                if (currentMonth === 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else {
+                    currentMonth--;
+                }
+                renderCalendar();
+            });
+            
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                if (currentMonth === 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                } else {
+                    currentMonth++;
+                }
+                renderCalendar();
+            });
+            
+            // Guest counter
+            document.getElementById('decreaseGuests').addEventListener('click', () => {
+                if (guests > 1) {
+                    guests--;
+                    updateGuestCount();
+                }
+            });
+            
+            document.getElementById('increaseGuests').addEventListener('click', () => {
+                if (guests < 12) {
+                    guests++;
+                    updateGuestCount();
+                }
+            });
+            
+            // Category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                    renderMenuItems(currentCategory);
+                });
+            });
+            
+            // Navigation buttons
+            document.getElementById('step1Next').addEventListener('click', () => goToStep(2));
+            document.getElementById('step2Back').addEventListener('click', () => goToStep(1));
+            document.getElementById('step2Next').addEventListener('click', () => goToStep(3));
+            document.getElementById('step3Back').addEventListener('click', () => goToStep(2));
+            document.getElementById('step3Next').addEventListener('click', () => goToStep(4));
+            document.getElementById('step4Back').addEventListener('click', () => goToStep(3));
+            document.getElementById('confirmBooking').addEventListener('click', confirmBooking);
+            document.getElementById('makeAnother').addEventListener('click', resetBooking);
+            
+            // Form validation
+            ['name', 'email', 'phone'].forEach(id => {
+                document.getElementById(id).addEventListener('input', validateForm);
+            });
+        }
+        
+        // Start
+        init();
+    </script>
+</body>
+</html>
